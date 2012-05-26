@@ -3,11 +3,13 @@ adt
 
 Android Development Toolkit
 
-Install
--------
-make a symbolic link to `<project>/bin/adt`, that's all. e.g.
+Installation
+------------
+Make a symbolic link to `<project>/bin/adt` and make sure it is in your `$PATH`, e.g.
 
     ln -s <project>/bin/adt ~/bin/adt
+
+That's all.
 
 Usage
 -----
