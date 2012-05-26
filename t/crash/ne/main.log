@@ -1,0 +1,29 @@
+05-15 17:01:12.113 I/DEBUG   (26138): debuggerd: tmb file path:'/data/tombstones/tombstone_03'
+05-15 17:01:12.113 I/DEBUG   (26138): *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+05-15 17:01:12.113 I/DEBUG   (26138): Build fingerprint: 'foobar:eng/release-keys'
+05-15 17:01:12.113 I/DEBUG   (26138): pid: 4285, tid: 7440  >>> system_server <<<
+05-15 17:01:12.113 I/DEBUG   (26138): signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr d458fb20
+05-15 17:01:12.113 I/DEBUG   (26138):  r0 00000020  r1 00000006  r2 3a83126f  r3 3a83126f
+05-15 17:01:12.113 I/DEBUG   (26138):  r4 0043c918  r5 0043d430  r6 48fc1cc8  r7 00000000
+05-15 17:01:12.113 I/DEBUG   (26138):  r8 004067a8  r9 40bdd5c0  10 00000000  fp 00000004
+05-15 17:01:12.113 I/DEBUG   (26138):  ip 40bdd5d0  sp 48fc1c08  lr afd10dbc  pc ad98d4ec  cpsr 60000030
+05-15 17:01:12.395 I/DEBUG   (26138):          #00  pc 0008d4ec  /system/lib/libicui18n.so
+05-15 17:01:12.396 I/DEBUG   (26138):          #01  pc 00093546  /system/lib/libicui18n.so
+05-15 17:01:12.396 I/DEBUG   (26138):          #02  pc 0000feb4  /system/lib/libnativehelper.so
+05-15 17:01:12.400 I/DEBUG   (26138):          #03  pc 0000e874  /system/lib/libdvm.so
+05-15 17:01:12.400 I/DEBUG   (26138): 
+05-15 17:01:12.400 I/DEBUG   (26138): code around pc:
+05-15 17:01:12.401 I/DEBUG   (26138): ad98d4cc 0100e9ca 6cd76862 dcf2429f 0102e9d5 
+05-15 17:01:12.401 I/DEBUG   (26138): ad98d4dc f04fab17 93110a00 0108e9cd 27009b08 
+05-15 17:01:12.401 I/DEBUG   (26138): ad98d4ec 1033f858 f0212001 ea4f427f 92036b11 
+05-15 17:01:12.401 I/DEBUG   (26138): ad98d4fc 3cfff10b 2308e9dd eb471880 e9cd0103 
+05-15 17:01:12.401 I/DEBUG   (26138): ad98d50c e9c50104 f1bc0102 d8670f36 f01ce8df 
+05-15 17:01:12.401 I/DEBUG   (26138): 
+05-15 17:01:12.401 I/DEBUG   (26138): code around lr:
+05-15 17:01:12.401 I/DEBUG   (26138): afd10d9c 02800016 08bd87f0 e5964000 e5967000 
+05-15 17:01:12.401 I/DEBUG   (26138): afd10dac e2144903 1a00000e e5965000 ebffee3f 
+05-15 17:01:12.402 I/DEBUG   (26138): afd10dbc e2055a02 e3853001 e1500003 0a000006 
+05-15 17:01:12.402 I/DEBUG   (26138): afd10dcc e5865000 e1a00006 e1a01005 e3a02001 
+05-15 17:01:12.402 I/DEBUG   (26138): afd10ddc ebfffeac e1a00004 e8bd87f0 e3a00000 
+05-15 17:01:12.402 I/DEBUG   (26138): 
+05-15 17:01:12.402 I/DEBUG   (26138): stack:

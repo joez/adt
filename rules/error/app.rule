@@ -1,0 +1,29 @@
+{
+	'app.die' => {
+		file => 'main|system',
+		probe => qr/Process.+?has died/,
+		context => [0, 4],
+	},
+	'app.die.events' => {
+		file => 'events',
+		probe => 'am_proc_died',
+		hint => 'app die',
+		format => 'raw',
+	},
+	'app.kill.events' => {
+		file => 'events',
+		probe => 'am_kill',
+		format => 'raw',
+	},
+	'app.timeout.pause.events' => {
+		file => 'events',
+		probe => 'am_failed_to_pause',
+		format => 'raw',
+	},
+	'low.memory.events' => {
+		file => 'events',
+		probe => 'am_low_memory',
+		hint => 'the memory is low',
+		format => 'raw',
+	},
+};

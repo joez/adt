@@ -1,0 +1,37 @@
+{
+	'media.scanner.start' => {
+		file => 'main|system',
+		probe => qr/\Qandroid.intent.action.MEDIA_SCANNER_STARTED\E/,
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(20, 20);
+			my $filter = $r->stash('filter');
+			unless ($filter) {
+				$filter = Adt::Filter->new->want(qr/MediaScanner[^:]+:/)->prepare;
+				$r->stash('filter', $filter);
+			}
+			return $filter->process($b), $filter->process($a);
+		},
+		hint => 'MediaScanner started, system may slow down, grep "MediaScanner" for more',
+	},
+	'media.scanner.finish' => {
+		file => 'main|system',
+		probe => qr/\Qandroid.intent.action.MEDIA_SCANNER_FINISHED\E/,
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(20, 20);
+			my $filter = $r->stash('filter');
+			unless ($filter) {
+				$filter = Adt::Filter->new->want(qr/MediaScanner[^:]+:/)->prepare;
+				$r->stash('filter', $filter);
+			}
+			return $filter->process($b), $filter->process($a);
+		},
+		hint => 'MediaScanner finished, grep "MediaScanner" for more',
+	},
+	'media.scanner.events' => {
+		file => 'events',
+		probe => qr/\Qcom.android.providers.media\/.MediaScannerService\E/,
+		format => 'raw',
+	},
+};

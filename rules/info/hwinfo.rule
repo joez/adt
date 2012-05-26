@@ -1,0 +1,16 @@
+{
+	'hwinfo.display' => {
+		file => 'main|system',
+		probe => 'DisplayHardware informations:',
+		hint => 'display hardware information',
+		context => [0, 24],
+	},
+	'hwinfo.keyboard' => {
+		file => 'main|system',
+		probe => 'New keyboard:',
+		hint => 'keyboard infomation',
+		context => [0, 1],
+	},
+	
+	
+};

@@ -1,0 +1,13 @@
+{
+	'watchdog' => {
+		file => 'events',
+		probe => 'watchdog',
+		hint => 'the system is most likely hung',
+	},
+	
+	'watchdog.kill' => {
+		file => 'main|system',
+		probe => 'WATCHDOG KILLING',
+		hint => 'killed by watchdog'
+	},
+};

@@ -1,0 +1,37 @@
+{
+	'tombstone' => {
+		file => 'tombstone',
+		probe => qr/\Q*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***\E/,
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(0, 250);
+			my $filter = $r->stash('filter_after');
+			unless ($filter) {
+				my $end = qr/\Q--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---\E/;
+				$filter = Adt::Filter->new->end($end)->prepare;
+				$r->stash('filter_after', $filter);
+			}
+			return $b, $filter->process($a);
+		},
+		hint => 'tombstone here',
+	},
+	
+	'tombstone.debuggerd' => {
+		file => 'main',
+		probe => qr/debuggerd: tmb file path:/,
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(0, 50);
+			my $filter = $r->stash('filter_after');
+			unless ($filter) {
+				my $end = qr/stack:$/;
+				my $want = qr/DEBUG/;
+				$filter = Adt::Filter->new->want($want)->end($end)->prepare;
+				$r->stash('filter_after', $filter);
+			}
+			return $b, $filter->process($a);
+		},
+		hint => 'tombstone here',
+	},
+
+};

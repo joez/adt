@@ -1,0 +1,80 @@
+{
+	'crash.app.events' => {
+		file => 'events',
+		probe => 'am_crash|am_wtf',
+		hint => 'process crash',
+	},
+	
+	'crash.app' => {
+		file => 'main|system',
+		probe => 'FATAL EXCEPTION',
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(0, 30);
+			my $filter = $r->stash('filter_after');
+			unless ($filter) {
+				$filter = Adt::Filter->new->want(qr/AndroidRuntime/)->prepare;
+				$r->stash('filter_after', $filter);
+			}
+			return $b, $filter->process($a);
+		},
+	},
+
+	'exception.uncaught' => {
+		file => 'main|system',
+		probe => 'thread exiting with uncaught exception',
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(5, 8);
+			my $filter = $r->stash('filter');
+			unless ($filter) {
+				$filter = Adt::Filter->new->want(qr/AndroidRuntime/)->prepare;
+				$r->stash('filter', $filter);
+			}
+			return $filter->process($b), $filter->process($a);
+		},
+		hint => 'see detail in dalvik/vm/Thread.c',
+	},
+	
+	'crash.reboot' => {
+		file => 'main|system',
+		probe => qr/AndroidRuntime START \Qcom.android.internal.os.ZygoteInit\E/,
+		hint => 'zygote start, android maybe restarted',
+	},
+
+	'crash.reboot.events' => {
+		file => 'events',
+		probe => 'boot_progress_system_run',
+		hint => 'system_server start, android maybe restarted',
+	},
+	
+	'crash.too_much.events' => {
+		file => 'events',
+		probe => 'am_process_crashed_too_much',
+		hint => 'process crash too mush, the related service, activity will be killed',
+		format => 'raw',
+	},
+	'crash.too_much' => {
+		file => 'main|system',
+		probe => 'has crashed too many times: killing!',
+		hint => 'process crash too mush, the related service, activity will be killed'
+	},	
+
+	'crash.service.too_much.events' => {
+		file => 'events',
+		probe => 'am_service_crashed_too_much',
+		hint => 'service crash too mush time, stop',
+		format => 'raw',
+	},
+	'crash.service.too_much' => {
+		file => 'system|main',
+		probe => qr/Service crashed\s\d+\stimes, stopping:/,
+		hint => 'service crash too mush time, stop'
+	},
+	
+	'crash.am' => {
+		file => 'main|system',
+		probe => 'Activity Manager Crash',
+		context => [1, 20],
+	},
+};

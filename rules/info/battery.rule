@@ -1,0 +1,44 @@
+{
+	'battery.level.event' => {
+		file => 'events',
+		probe => 'battery_level',
+		hint => 'level, voltage, temperature',
+		format => 'raw',
+	},
+	
+	'battery.status.event' => {
+		file => 'events',
+		probe => 'battery_status',
+		hint => 'status, health, present, plugged, technology',
+		format => 'raw',
+	},
+	
+	'battery.discharge.event' => {
+		file => 'events',
+		probe => 'battery_discharge',
+		hint => 'duration, minLevel, maxLevel',
+		format => 'raw',
+	},
+
+	'battery.low' => {
+		file => 'main|system',
+		probe => qr/ActivityManager.+?\Qandroid.intent.action.BATTERY_LOW\E/,
+		hint => 'battery low',
+	},
+
+	'battery.report' => {
+		file => 'report',
+		probe => qr/^DUMP OF SERVICE battery:/,
+		hint => 'search "batteryinfo" for battery history',
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(0, 12);
+			my $filter = $r->stash('filter_after');
+			unless ($filter) {
+				$filter = Adt::Filter->new->end(qr/^------------------/)->prepare;
+				$r->stash('filter_after', $filter);
+			}
+			return $b, $filter->process($a);
+		},
+	},
+};

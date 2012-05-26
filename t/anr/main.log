@@ -1,0 +1,17 @@
+
+03-29 12:47:13.791 E/dalvikvm(  148): [DVM] mmap return base = 4a5fc000
+03-29 12:47:14.362 E/ActivityManager(  148): ANR in com.justnote
+03-29 12:47:14.362 E/ActivityManager(  148): Reason: Executing service com.justnote/.RegisterAlarmManager
+03-29 12:47:14.362 E/ActivityManager(  148): Load: 10.74 / 4.59 / 1.71
+03-29 12:47:14.362 E/ActivityManager(  148): CPU usage from 7643ms to 0ms ago:
+03-29 12:47:14.362 E/ActivityManager(  148):   0.9% 453/com.android.email: 0.9% user + 0% kernel / faults: 252 minor
+03-29 12:47:14.362 E/ActivityManager(  148):   1.1% 148/system_server: 0.9% user + 0.2% kernel / faults: 131 minor
+03-29 12:47:14.362 E/ActivityManager(  148):   0.9% 48/mmcqd: 0% user + 0.9% kernel
+03-29 12:47:14.362 E/ActivityManager(  148):   0.1% 145/mdlogger: 0% user + 0.1% kernel
+03-29 12:47:14.362 E/ActivityManager(  148):   0.2% 46/mmcqd: 0% user + 0.2% kernel
+03-29 12:47:14.362 E/ActivityManager(  148):   0% 297/com.android.phone: 0% user + 0% kernel / faults: 6 minor
+03-29 12:47:14.362 E/ActivityManager(  148):   0% 363/flush-179:8: 0% user + 0% kernel
+03-29 12:47:14.362 E/ActivityManager(  148):   0.1% 430/com.android.providers.calendar: 0% user + 0.1% kernel
+03-29 12:47:14.362 E/ActivityManager(  148): 100% TOTAL: 2.7% user + 2% kernel + 95% iowait
+03-29 12:47:14.363 E/dalvikvm(  453): [DVM] mmap return base = 45683000
+

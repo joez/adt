@@ -1,0 +1,48 @@
+{
+	'sensor.dump' => {
+		file => 'report',
+		probe => qr/^DUMP OF SERVICE sensorservice/,
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(0, 40);
+			my $filter = $r->stash('filter_after');
+			unless ($filter) {
+				$filter = Adt::Filter->new->end(qr/^------------------/)->prepare;
+				$r->stash('filter_after', $filter);
+			}
+			return $b, $filter->process($a);
+		},
+	},
+
+	'sensor.changed.proximity.pms' => {
+		file => 'main|system',
+		probe => qr/\QmProximityListener.onSensorChanged\E/,
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(2, 5);
+			my $filter = $r->stash('filter');
+			unless ($filter) {
+				$filter = Adt::Filter->new->want(qr/proximity/)->prepare;
+				$r->stash('filter', $filter);
+			}
+			return $filter->process($b), $filter->process($a);
+		},
+		hint => 'proximity sensor changed at PowerManagerService',
+	},
+	
+	'sensor.changed.light.pms' => {
+		file => 'main|system',
+		probe => qr/\QonSensorChanged: light value:\E/,
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(2, 5);
+			my $filter = $r->stash('filter');
+			unless ($filter) {
+				$filter = Adt::Filter->new->want(qr/light/)->prepare;
+				$r->stash('filter', $filter);
+			}
+			return $filter->process($b), $filter->process($a);
+		},
+		hint => 'light sensor changed at PowerManagerService',
+	},
+};

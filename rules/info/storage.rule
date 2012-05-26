@@ -1,0 +1,42 @@
+{
+	'storage.free.event' => {
+		file => 'events',
+		probe => 'free_storage_left',
+		hint => 'data, system, cache',
+		format => 'raw',
+	},
+	
+	'storage.low.event' => {
+		file => 'events',
+		probe => 'low_storage',
+		hint => 'low memory notification, data left',
+		format => 'raw',
+	},
+	
+	'storage.low' => {
+		file => 'main|system',
+		probe => qr/ActivityManager.+?\Qandroid.intent.action.DEVICE_STORAGE_LOW\E/,
+		hint => 'low memory notification',
+	},
+	
+	'storage.full' => {
+		file => 'main|system',
+		probe => qr/ActivityManager.+?\Qandroid.intent.action.DEVICE_STORAGE_FULL\E/,
+		hint => 'memory full notification',
+	},
+
+	'storage.report' => {
+		file => 'report',
+		probe => qr/^DUMP OF SERVICE diskstats:/,
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(0, 4);
+			my $filter = $r->stash('filter_after');
+			unless ($filter) {
+				$filter = Adt::Filter->new->end(qr/^------------------/)->prepare;
+				$r->stash('filter_after', $filter);
+			}
+			return $b, $filter->process($a);
+		},
+	},
+};

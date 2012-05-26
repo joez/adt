@@ -1,0 +1,31 @@
+{
+	'notification.enqueue.event' => {
+		file => 'events',
+		probe => 'notification_enqueue',
+		format => 'raw',
+	},
+	'notification.cancel.event' => {
+		file => 'events',
+		probe => 'notification_cancel',
+		format => 'raw',
+	},
+	'notification.cancelall.event' => {
+		file => 'events',
+		probe => 'notification_cancel_all',
+		format => 'raw',
+	},
+	'notification.report' => {
+		file => 'report',
+		probe => qr/^DUMP OF SERVICE notification:/,
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(0, 150);
+			my $filter = $r->stash('filter_after');
+			unless ($filter) {
+				$filter = Adt::Filter->new->end(qr/^------------------/)->prepare;
+				$r->stash('filter_after', $filter);
+			}
+			return $b, $filter->process($a);
+		},
+	},
+};

@@ -1,0 +1,228 @@
+#!/usr/bin/env perl
+# author: joe.zheng
+
+use FindBin;
+use lib "$FindBin::RealBin/../lib";
+
+use Getopt::Long;
+use File::Spec::Functions qw/catdir catfile canonpath/;
+use File::Find 'find';
+use File::Basename;
+
+use Adt::Parser;
+use Adt::Rule;
+use Adt::Reporter;
+use Adt::Filter;
+
+use Joez::Log;
+
+#
+# main
+#
+my $L = Joez::Log->new;
+
+my $base = catdir($FindBin::RealBin, '..');
+
+my $name = 'analysis.txt';
+my $help;
+my $rule = [];
+
+GetOptions("rule|r=s@" => \$rule, "name|n=s" => \$name, "help|h" => \$help,);
+
+my $script = basename($0);
+if ($help) {
+  print <<"EOF";
+Parse the logs according to the provided rules and output a report
+Usage:
+    $script [options] [logs]
+Options:
+    rule:   rule directory or file, ':fatal' as default
+    name:   file name of the report
+    help:   help
+Parameters:
+    logs:   directories or files to parse, './' as default
+Examples:
+    1. $script
+       parse the current directory using default rules
+    2. $script -r :.
+       parse the current directory using all the built-in rules
+    3. $script -r :info -r :minor -n o.txt logs bugreport.log
+       parse the 'logs' directory and bugreport.log, using built-in
+       rules in the 'info' and 'minor' sub-directories, output o.txt
+    4. $script -r ./rules/info.rule -r ./rules/test
+       parse the current directory, using rules supplied
+EOF
+  exit;
+}
+
+my @logs = @ARGV;
+push @logs, '.' unless @logs;
+
+# parse rule definitions
+my $def = {};
+
+# default rule definitions
+push @{$rule}, ':fatal' if @{$rule} < 1;
+
+my %rule_files;
+
+$L->debug('collect rule definition files start');
+for my $f (@{$rule}) {
+  $L->debug($f);
+
+  if ($f =~ /^:(.+)/) {
+    $f = catfile($base, 'rules', $1);
+  }
+  next unless -e $f;
+
+  $f = readlink $f if -l $f;
+
+  if (-d $f) {
+    find {
+      wanted => sub {
+        next if /^\./;    # no hidden entires
+
+        $rule_files{$File::Find::name} = 1 if /\.rule$/;
+      },
+      no_chdir => 1
+    }, $f;
+  }
+  elsif (-f $f) {
+    $rule_files{$f} = 1;
+  }
+}
+$L->debug('collect rule definition files done');
+
+$L->debug('parse rule definition start');
+for (sort keys %rule_files) {
+  $L->debug($_);
+
+  if (my $r = do $_) {
+    while (my ($k, $v) = each %{$r}) {
+      $L->warn("duplicate rules: $k") if exists $def->{$k};
+      $def->{$k} = $v;
+    }
+    $def = {%{$def}, %{$r}};
+  }
+  elsif ($@) {
+    $L->debug("failed to parse: $@");
+  }
+  else {
+    $L->debug("failed to read: $!") unless defined $r;
+  }
+}
+$L->debug('parse rule definition done');
+
+# create rule objects
+my $R = [];
+for (sort keys %{$def}) {
+  my $r = Adt::Rule->new($def->{$_})->name($_)->prepare;
+  push @{$R}, $r if $r->probe;
+}
+
+# create parser
+my $report_dir = @logs == 1 && -d $logs[0] ? $logs[0] : '.';
+my $P
+  = Adt::Parser->new->offset_top(500)->offset_end(3000)->rules($R)
+  ->reporter(Adt::Reporter->new->path(catfile($report_dir, $name)))
+  ->tokenizer(Adt::Tokenizer->new->prepare);
+
+# parse all the files
+$L->debug('parse logs start');
+my %log_files;
+
+$L->debug('list logs start');
+for my $f (@logs) {
+  $L->debug($f);
+
+  next unless -e $f;
+
+  $f = readlink $f if -l $f;
+
+  if (-d $f) {
+    find {
+      wanted => sub {
+        $log_files{$File::Find::name}++;
+      },
+      no_chdir => 1
+    }, $f;
+  }
+  elsif (-f $f) {
+    $log_files{$f}++;
+  }
+}
+$L->debug('list logs done');
+
+$L->debug('dump bugreport logs start');
+for my $path (keys %log_files) {
+  my $basename = fileparse($path, qr/\.[^.]*/);
+
+  if ($basename =~ /report/i && -f $path && -T _) {
+    $L->debug("dump logs from $path");
+
+    my $dir = catdir(dirname($path), $basename . '-dump');
+    unless (-e $dir) {
+      unless (mkdir $dir) {
+        $L->warn("failed to create dir: $dir");
+        next;
+      }
+    }
+
+    if (-w $dir) {
+      my %name_map = (
+        SYSTEM => 'main',
+        EVENT  => 'events',
+        RADIO  => 'radio',
+        KERNEL => 'kernel',
+      );
+      my $fho;
+      open my $fh, '<', $path or die;
+      while (<$fh>) {
+        if (/^------ (\w+) LOG \(/) {
+          my $po = catfile($dir, $name_map{$1} . '.log');
+          $L->debug("write to file: $po");
+
+          $log_files{$po}++;
+
+          open $fho, '>', $po or die;
+        }
+        elsif (/^------ /) {
+          close $fho;
+          $fho = undef;
+        }
+        elsif ($fho) {
+          print $fho $_;
+        }
+      }
+      close $fho if $fho;
+      close $fh;
+    }
+  }
+}
+$L->debug('dump bugreport logs done');
+
+# eliminate duplicated logs
+%log_files = map { canonpath($_), 1 } keys %log_files;
+
+for my $path (sort keys %log_files) {
+  $L->debug('check: ' . $path);
+
+  next unless $P->file($path)->prepare->capable;
+
+  $L->debug('parse: ' . $path);
+
+  open my $fh, '<', $P->file or die;
+
+  while (<$fh>) {
+    $P->feed($_);
+  }
+
+  $P->done;
+  close $fh;
+}
+$L->debug('parse logs done');
+
+$L->debug('report output (may not exist if no output): ' . $P->reporter->path);
+$P->reporter->done;
+$L->debug('report output done');
+

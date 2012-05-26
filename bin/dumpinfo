@@ -1,0 +1,183 @@
+#!/usr/bin/env perl
+# author: joe.zheng
+
+use strict;
+use Getopt::Long;
+
+use File::Basename qw/basename/;
+
+no strict 'subs';
+
+my %opts = (info => 1, java => 0, lsof => 0, maps => 0,);
+
+my %cbs = (
+  info => \&show_info,
+  java => \&show_java,
+  lsof => \&show_lsof,
+  maps => \&show_maps,
+);
+
+my $help;
+
+GetOptions(
+  "help|h" => \$help,
+
+  "info|i" => \$opts{info},
+  "java|j" => \$opts{java},
+  "lsof|l" => \$opts{lsof},
+  "maps|m" => \$opts{maps},
+);
+
+my $script = basename($0);
+
+if ($help) {
+  print <<"EOF";
+to dump information of a process
+Usage:
+    $script [options] [process name]
+Options:
+    help:    to show this
+    info:    dump process's important information
+    java:    dump java stack
+    lsof:    dump the opened files
+    maps:    dump the process's memory map
+Process name:
+    the target process's name, 'system_server' as default
+EOF
+  exit;
+}
+
+#
+# main
+#
+my $pnm = shift || 'system_server';
+my $pid = find_pid($pnm);
+
+for my $k (sort keys %opts) {
+  $cbs{$k}->($pid) if $opts{$k};
+}
+
+
+#
+# subs
+#
+sub find_pid {
+  my $pnm = shift or die;
+  my %head;
+  my $pid = -1;
+
+  open my $fh, "adb shell ps|" or die;
+  while (<$fh>) {
+    chomp;
+
+    unless (keys %head) {
+      my $c;
+      for my $n (split) {
+        $head{uc $n} = $c++;
+      }
+
+      # hot fix
+      $head{NAME}++;
+    }
+    else {
+      my @fields = split;
+      if ($fields[$head{NAME}] eq $pnm) {
+        $pid = $fields[$head{PID}];
+        last;
+      }
+    }
+  }
+  close $fh;
+
+  return $pid;
+}
+
+sub show_info {
+  my $pid = shift or die;
+
+  local $\ = "\n";
+
+  print "// [[ info $pid";
+
+  my @fs = qw{
+    status
+    personality
+    limits
+    sched
+    comm
+    stat
+    statm
+    mounts
+    stack
+    schedstat
+    oom_score
+    oom_adj
+    coredump_filter
+  };
+
+  for my $f (@fs) {
+    print "// [[ $f";
+    system "adb shell cat /proc/$pid/$f";
+    print "// ]] $f";
+  }
+
+  print "// ]] info $pid";
+}
+
+sub show_lsof {
+  my $pid = shift or die;
+
+  local $\ = "\n";
+
+  open my $fh, "adb shell ls -l /proc/$pid/fd|" or die;
+
+  print "// [[ lsof $pid";
+
+  my $count;
+
+  while (<$fh>) {
+    chomp;
+
+    print $_;
+    $count++;
+  }
+
+  print "// ]] lsof $pid, total:$count";
+
+  close $fh;
+}
+
+sub show_maps {
+  my $pid = shift or die;
+
+  local $\ = "\n";
+
+  print "// [[ maps $pid";
+
+  my @fs = qw{
+    maps
+    smaps
+  };
+
+  for my $f (@fs) {
+    print "// [[ $f";
+    system "adb shell cat /proc/$pid/$f";
+    print "// ]] $f";
+  }
+
+  print "// ]] maps $pid";
+}
+
+sub show_java {
+  my $pid = shift or die;
+
+  local $\ = "\n";
+
+  print "// [[ java $pid";
+
+  system "adb shell kill -3 $pid";
+  sleep(1);
+  system "adb shell cat /data/anr/traces.txt";
+
+  print "// ]] java $pid";
+}

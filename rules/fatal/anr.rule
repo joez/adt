@@ -1,0 +1,54 @@
+{
+	'anr' => {
+		file => 'main|system',
+		probe => 'ANR in',
+		filter => 'tag:ActivityManager',
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(0, 40);
+			my $filter = $r->stash('filter_after');
+			unless ($filter) {
+				$filter = Adt::Filter->new->end(qr/% TOTAL:/)->prepare;
+				$r->stash('filter_after', $filter);
+			}
+			return $b, $filter->process($a);
+		},
+		hint => 'ANR, see traces.txt for details',
+	},
+	
+	'anr.keydispatch' => {
+		file => 'main|system',
+		probe => qr/Application is not responding:/,
+		context => [0,2],
+		hint => 'key dispatch ANR',
+	},
+	
+	'anr.events' => {
+		file => 'events',
+		probe => 'am_anr',
+		hint => 'anr: pid, Package Name, Flags, reason',
+		format => 'raw',
+	},
+
+	'anr.last.report' => {
+		file => 'report',
+		probe => qr/^------ VM TRACES AT LAST ANR/,
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(0, 50);
+			my $filter = $r->stash('filter_after');
+			unless ($filter) {
+				$filter = Adt::Filter->new->end(qr/^(?:\s+at dalvik.system.NativeStart.main|-----)/)->prepare;
+				$r->stash('filter_after', $filter);
+			}
+			return $b, $filter->process($a);
+		},
+		hint => 'see also anr/traces.txt',
+	},
+	
+	'anr.fc' => {
+		file => 'main|system',
+		probe => qr/Killing.+?user's request/,
+		format => 'raw',
+	},
+};

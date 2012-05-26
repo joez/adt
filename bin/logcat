@@ -1,0 +1,153 @@
+#!/usr/bin/env perl
+# author: joe.zheng
+
+use strict;
+use File::Spec;
+use File::Path qw(make_path);
+use File::Basename qw/basename/;
+
+require Time::Local;
+
+my $directory = shift || '.';
+my $script = basename($0);
+
+sub p { local $\ = "\n"; print "$script> ", @_; }
+
+if ($directory =~ m/^-/) {
+  print <<"EOF";
+Utility to capture logs, save to separate files and monitor at the meantime
+Usage:
+    $script [directory] [logcat params]
+Parameters:
+    directory:      auto created directory to store logs
+    logcat params:  parameters feed to logcat
+Environment:
+	TCPDUMP:		enable to capture tcp package as well
+EOF
+  exit;
+}
+
+# wait for device ready
+p "wait for device ready...";
+system "adb wait-for-device";
+p "ok";
+
+my ($sec, $min, $hour, $mday, $mon, $year) = localtime;
+my $stamp = sprintf(
+  '%04d%02d%02d-%02d%02d%02d',
+  $year + 1900,
+  $mon + 1, $mday, $hour, $min, $sec
+);
+my $path;
+
+$directory = File::Spec->catdir($directory, 'log-' . $stamp);
+make_path($directory) unless -e $directory;
+
+# pre-process
+my ($boot, $curtime) = get_boot_epoch();
+
+$path = File::Spec->catfile($directory, "info.txt");
+open my $fh_info, '>', $path or die;
+print $fh_info "current time: $curtime, boot epoch: $boot";
+close $fh_info;
+
+$path = File::Spec->catfile($directory, "prop.txt");
+system "adb shell getprop > $path";
+
+my %pids;
+my $logcat = "adb logcat";
+
+my @bufs = qw/main radio events system kernel monitor/;
+if ($ENV{TCPDUMP}) {
+  push @bufs, 'tcpdump';
+}
+
+foreach my $buffer (@bufs) {
+  $path = File::Spec->catfile($directory, "$buffer.log");
+
+  defined(my $pid = fork) or die "Can't fork: $!";
+  if ($pid) {
+    $pids{$path} = $pid;
+  }
+  else {
+
+    # child process here
+    if ($buffer eq "monitor") {
+      exec "$logcat @ARGV > $path";
+    }
+    elsif ($buffer eq "kernel") {
+      exec "adb shell cat /proc/kmsg > $path";
+    }
+    elsif ($buffer eq "tcpdump") {
+      exec "adb shell tcpdump -vv -p -s 0 > $path";
+    }
+    else {
+      exec "$logcat -v time -b $buffer > $path";
+    }
+  }
+}
+
+system "$logcat @ARGV";
+print "\n";
+
+foreach my $pid (values %pids) {
+  kill "INT", $pid;
+  waitpid $pid, 0;
+}
+
+# post-process
+p "post-process:";
+parse_timestamp(File::Spec->catfile($directory, "kernel.log"), $boot);
+
+p "logs saved at:";
+p $_ foreach sort keys %pids;
+
+
+# subs
+
+sub get_boot_epoch {
+  my %MONTHS;
+  {
+    my $i = 0;
+    $MONTHS{$_} = $i++
+      foreach qw/Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec/;
+  }
+
+  my $uptime = (split /\s/, `adb shell cat /proc/uptime`)[0];
+  chomp $uptime;
+  my $cutime = `adb shell date -u`;
+  chomp $cutime;
+  my $epoch;
+
+  # Thu Jan  1 20:09:11 GMT 1970
+  if ($cutime =~ /^\w+\s+(\w+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+\w+\s+(\d+)/) {
+    my ($day, $month, $year, $h, $m, $s) = ($2, $MONTHS{$1}, $6, $3, $4, $5);
+    $epoch = Time::Local::timegm($s, $m, $h, $day, $month, $year) - $uptime;
+  }
+
+  return $epoch, $cutime, $uptime;
+}
+
+sub get_format_time {
+  my ($s, $m, $h, $day, $month) = localtime(shift);
+
+  return sprintf('%02d-%02d %02d:%02d:%02d', $month + 1, $day, $h, $m, $s);
+}
+
+sub parse_timestamp {
+  my $dst = shift or die;
+  my $bak = $dst . '.bak';
+  my $ini = shift || 0;
+
+  unlink $bak if -e $bak;
+  rename $dst, $bak;
+  open my $fhi, '<', $bak or die;
+  open my $fho, '>', $dst or die;
+  while (<$fhi>) {
+    s/\[\s*([\d\.]+)\]/$& . " [" . get_format_time($ini+$1) . "]"/e;
+    print $fho $_;
+  }
+  close $fho;
+  close $fhi;
+  unlink $bak;
+}

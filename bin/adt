@@ -1,0 +1,49 @@
+#!/usr/bin/env perl
+# author: joe.zheng
+
+use strict;
+
+use FindBin;
+use lib "$FindBin::RealBin/../lib";
+
+use List::Util qw/first/;
+use File::Spec::Functions qw/catdir catfile/;
+use File::Basename qw/basename/;
+
+my $bindir = $FindBin::RealBin;
+my $script = basename(__FILE__);
+
+opendir my $dh, $bindir or die;
+my @cmd = grep { !(/^\.{1,2}$/ || /^$script$/) } sort readdir $dh;
+closedir $dh;
+
+my $cmd = shift || 'help';
+
+if ($cmd eq 'help') {
+  my $subcmd = shift;
+  if ($subcmd) {
+    $cmd = $subcmd;
+    unshift @ARGV, '-h';
+  }
+  else {
+    my $cmd_list = join "\n    ", 'help', @cmd;
+
+    print <<"EOF";
+Android Development Toolkit
+Usage:
+    adt cmd [args]
+cmd:
+    $cmd_list
+EOF
+    die;
+  }
+}
+
+if (first { $_ eq $cmd } @cmd) {
+  unshift @ARGV, catfile($bindir, $cmd);
+
+  exec 'perl', @ARGV;
+}
+else {
+  die "unsupported command: $cmd\n";
+}

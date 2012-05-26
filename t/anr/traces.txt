@@ -1,0 +1,244 @@
+
+
+----- pid 749 at 2012-04-09 10:43:26 -----
+Cmd line: com.cooliris.media
+
+DALVIK THREADS:
+(mutexes: tll=0 tsl=0 tscl=0 ghl=0 hwl=0 hwll=0)
+"main" prio=5 tid=1 MONITOR
+  | group="main" sCount=1 dsCount=0 obj=0x40025340 self=0xcf58
+  | sysTid=749 nice=0 sched=0/0 cgrp=default handle=-1345006464
+  | schedstat=( 1914754087 4554660225 10683 )
+  at com.cooliris.media.MediaFeed.shutdown(MediaFeed.java:~149)
+  - waiting to lock <0x40531900> (a java.util.ArrayList) held by threadid=112 (MediaSets)
+  at com.cooliris.media.GridLayer.shutdown(GridLayer.java:240)
+  at com.cooliris.media.Gallery.onDestroy(Gallery.java:426)
+  at android.app.ActivityThread.performDestroyActivity(ActivityThread.java:2759)
+  at android.app.ActivityThread.handleDestroyActivity(ActivityThread.java:2790)
+  at android.app.ActivityThread.access$2100(ActivityThread.java:155)
+  at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1032)
+  at android.os.Handler.dispatchMessage(Handler.java:130)
+  at android.os.Looper.loop(SourceFile:351)
+  at android.app.ActivityThread.main(ActivityThread.java:3820)
+  at java.lang.reflect.Method.invokeNative(Native Method)
+  at java.lang.reflect.Method.invoke(Method.java:538)
+  at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:969)
+  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:727)
+  at dalvik.system.NativeStart.main(Native Method)
+
+"MediaSets" prio=5 tid=112 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x4055fbf0 self=0x208400
+  | sysTid=1837 nice=0 sched=0/0 cgrp=default handle=3097776
+  | schedstat=( 3548310 11657690 15 )
+  at java.io.File.createNewFileImpl(Native Method)
+  at java.io.File.createNewFile(File.java:1288)
+  at java.io.File.createTempFile(File.java:1353)
+  at com.cooliris.media.DiskCache.writeIndex(DiskCache.java:332)
+  at com.cooliris.media.DiskCache.flush(DiskCache.java:231)
+  at com.cooliris.cache.CacheService.markDirty(CacheService.java:295)
+  at com.cooliris.cache.CacheService.computeDirtySets(CacheService.java:1437)
+  at com.cooliris.media.LocalDataSource.refresh(LocalDataSource.java:644)
+  at com.cooliris.media.ConcatenatedDataSource.refresh(ConcatenatedDataSource.java:116)
+  at com.cooliris.media.MediaFeed.loadMediaSets(MediaFeed.java:592)
+  at com.cooliris.media.MediaFeed$2.run(MediaFeed.java:534)
+  at java.lang.Thread.run(Thread.java:1050)
+
+"ReverseGeocoder" prio=5 tid=109 WAIT
+  | group="main" sCount=1 dsCount=0 obj=0x405b8e70 self=0x1d8c90
+  | sysTid=1834 nice=10 sched=0/0 cgrp=bg_non_interactive handle=1936840
+  | schedstat=( 399693 22759537 6 )
+  at java.lang.Object.wait(Native Method)
+  - waiting on <0x405d4f48> (a com.cooliris.media.Deque)
+  at java.lang.Object.wait(Object.java:389)
+  at com.cooliris.media.ReverseGeocoder.run(ReverseGeocoder.java:118)
+
+"AppHandlerThread" prio=5 tid=19 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x405303f0 self=0x246168
+  | sysTid=1833 nice=0 sched=0/0 cgrp=default handle=3322384
+  | schedstat=( 9181620 22587920 127 )
+  at android.os.MessageQueue.nativePollOnce(Native Method)
+  at android.os.MessageQueue.next(MessageQueue.java:148)
+  at android.os.Looper.loop(SourceFile:330)
+  at android.os.HandlerThread.run(HandlerThread.java:91)
+
+"Thread-347" prio=5 tid=52 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x40541ff8 self=0x1aaed0
+  | sysTid=1770 nice=0 sched=0/0 cgrp=default handle=1831776
+  | schedstat=( 8186384 7692770 13 )
+  at java.io.File.renameToImpl(Native Method)
+  at java.io.File.renameTo(File.java:1388)
+  at com.cooliris.media.DiskCacheOfThumbnail.writeIndex(DiskCacheOfThumbnail.java:407)
+  at com.cooliris.media.DiskCacheOfThumbnail.flush(DiskCacheOfThumbnail.java:82)
+  at com.cooliris.media.Gallery$5.run(Gallery.java:381)
+
+"AppHandlerThread" prio=5 tid=17 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x40656e88 self=0x3eaa28
+  | sysTid=1702 nice=0 sched=0/0 cgrp=default handle=2620432
+  | schedstat=( 62080180 199726370 870 )
+  at android.os.MessageQueue.nativePollOnce(Native Method)
+  at android.os.MessageQueue.next(MessageQueue.java:148)
+  at android.os.Looper.loop(SourceFile:330)
+  at android.os.HandlerThread.run(HandlerThread.java:91)
+
+"AppHandlerThread" prio=5 tid=12 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x40670b40 self=0x1be2e8
+  | sysTid=1459 nice=0 sched=0/0 cgrp=default handle=4114768
+  | schedstat=( 13615065 150567704 213 )
+  at android.os.MessageQueue.nativePollOnce(Native Method)
+  at android.os.MessageQueue.next(MessageQueue.java:148)
+  at android.os.Looper.loop(SourceFile:330)
+  at android.os.HandlerThread.run(HandlerThread.java:91)
+
+"BinderThd_AP749" prio=5 tid=23 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x406945f8 self=0x421fe8
+  | sysTid=932 nice=0 sched=0/0 cgrp=default handle=3736616
+  | schedstat=( 31361232 220675529 537 )
+  at dalvik.system.NativeStart.run(Native Method)
+
+"AppHandlerThread" prio=5 tid=11 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x4065bc20 self=0x2c41d0
+  | sysTid=902 nice=0 sched=0/0 cgrp=default handle=2768672
+  | schedstat=( 12369920 231243543 114 )
+  at android.os.MessageQueue.nativePollOnce(Native Method)
+  at android.os.MessageQueue.next(MessageQueue.java:148)
+  at android.os.Looper.loop(SourceFile:330)
+  at android.os.HandlerThread.run(HandlerThread.java:91)
+
+"BinderThd_AP749" prio=5 tid=20 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x405a6de0 self=0x280520
+  | sysTid=771 nice=0 sched=0/0 cgrp=default handle=2616720
+  | schedstat=( 43491521 324713858 783 )
+  at dalvik.system.NativeStart.run(Native Method)
+
+"android.hardware.SensorManager$SensorThread" prio=5 tid=18 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x405b68e8 self=0x27e178
+  | sysTid=768 nice=-8 sched=0/0 cgrp=default handle=2620496
+  | schedstat=( 459581120 784619697 4318 )
+  at android.hardware.SensorManager.sensors_data_poll(Native Method)
+  at android.hardware.SensorManager$SensorThread$SensorThreadRunnable.run(SensorManager.java:477)
+  at java.lang.Thread.run(Thread.java:1050)
+
+"TextureLoad" prio=5 tid=16 WAIT
+  | group="main" sCount=1 dsCount=0 obj=0x40512780 self=0x256400
+  | sysTid=766 nice=1 sched=0/0 cgrp=default handle=2450744
+  | schedstat=( 1811569988 5250064228 5874 )
+  at java.lang.Object.wait(Native Method)
+  - waiting on <0x40562948> (a com.cooliris.media.Deque)
+  at java.lang.Object.wait(Object.java:389)
+  at com.cooliris.media.RenderView$TextureLoadThread.run(RenderView.java:1126)
+
+"TextureLoad" prio=5 tid=15 WAIT
+  | group="main" sCount=1 dsCount=0 obj=0x405126f0 self=0x255748
+  | sysTid=765 nice=1 sched=0/0 cgrp=default handle=2447488
+  | schedstat=( 2002081072 5194724960 8324 )
+  at java.lang.Object.wait(Native Method)
+  - waiting on <0x40562948> (a com.cooliris.media.Deque)
+  at java.lang.Object.wait(Object.java:389)
+  at com.cooliris.media.RenderView$TextureLoadThread.run(RenderView.java:1126)
+
+"TextureLoad" prio=5 tid=14 WAIT
+  | group="main" sCount=1 dsCount=0 obj=0x40585320 self=0x254a90
+  | sysTid=764 nice=1 sched=0/0 cgrp=default handle=2444232
+  | schedstat=( 326614 215698079 16 )
+  at java.lang.Object.wait(Native Method)
+  - waiting on <0x405634d0> (a com.cooliris.media.Deque)
+  at java.lang.Object.wait(Object.java:389)
+  at com.cooliris.media.RenderView$TextureLoadThread.run(RenderView.java:1126)
+
+"TextureLoad" prio=5 tid=13 WAIT
+  | group="main" sCount=1 dsCount=0 obj=0x405c91d0 self=0x253e28
+  | sysTid=763 nice=1 sched=0/0 cgrp=default handle=2441056
+  | schedstat=( 794889753 2373101030 6799 )
+  at java.lang.Object.wait(Native Method)
+  - waiting on <0x40563288> (a com.cooliris.media.Deque)
+  at java.lang.Object.wait(Object.java:389)
+  at com.cooliris.media.RenderView$TextureLoadThread.run(RenderView.java:1126)
+
+"AppHandlerThread" prio=5 tid=10 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x405d4528 self=0x1a9200
+  | sysTid=760 nice=0 sched=0/0 cgrp=default handle=1387664
+  | schedstat=( 18690538 323906001 39 )
+  at android.os.MessageQueue.nativePollOnce(Native Method)
+  at android.os.MessageQueue.next(MessageQueue.java:148)
+  at android.os.Looper.loop(SourceFile:330)
+  at android.os.HandlerThread.run(HandlerThread.java:91)
+
+"RefQueueWorker@org.apache.http.impl.conn.tsccm.ConnPoolByRoute@405c4140" daemon prio=5 tid=9 WAIT
+  | group="main" sCount=1 dsCount=0 obj=0x405c7090 self=0xa6000
+  | sysTid=758 nice=0 sched=0/0 cgrp=default handle=680248
+  | schedstat=( 252538 208219002 10 )
+  at java.lang.Object.wait(Native Method)
+  - waiting on <0x405c6088> (a java.lang.ref.ReferenceQueue)
+  at java.lang.Object.wait(Object.java:426)
+  at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:138)
+  at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:111)
+  at org.apache.http.impl.conn.tsccm.RefQueueWorker.run(RefQueueWorker.java:133)
+  at java.lang.Thread.run(Thread.java:1050)
+
+"BinderThd_AP749" prio=5 tid=8 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x405188f8 self=0x206a98
+  | sysTid=757 nice=0 sched=0/0 cgrp=default handle=1674264
+  | schedstat=( 44867850 306540529 791 )
+  at dalvik.system.NativeStart.run(Native Method)
+
+"BinderThd_AP749" prio=5 tid=7 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x40518780 self=0x20dff0
+  | sysTid=756 nice=0 sched=0/0 cgrp=default handle=2118176
+  | schedstat=( 47758400 327434684 802 )
+  at dalvik.system.NativeStart.run(Native Method)
+
+"Compiler" daemon prio=5 tid=6 VMWAIT
+  | group="system" sCount=1 dsCount=0 obj=0x405145f8 self=0x20ddd8
+  | sysTid=755 nice=0 sched=0/0 cgrp=default handle=565832
+  | schedstat=( 786956322 2397405287 6525 )
+  at dalvik.system.NativeStart.run(Native Method)
+
+"JDWP" daemon prio=5 tid=5 VMWAIT
+  | group="system" sCount=1 dsCount=0 obj=0x40514548 self=0x20dbc0
+  | sysTid=754 nice=0 sched=0/0 cgrp=default handle=1174536
+  | schedstat=( 491770 205301538 16 )
+  at dalvik.system.NativeStart.run(Native Method)
+
+"Signal Catcher" daemon prio=5 tid=4 RUNNABLE
+  | group="system" sCount=0 dsCount=0 obj=0x40514488 self=0x20d9a8
+  | sysTid=753 nice=0 sched=0/0 cgrp=default handle=1172240
+  | schedstat=( 5231692 203390539 14 )
+  at dalvik.system.NativeStart.run(Native Method)
+
+"GC" daemon prio=5 tid=3 VMWAIT
+  | group="system" sCount=1 dsCount=0 obj=0x405143e0 self=0x209690
+  | sysTid=752 nice=0 sched=0/0 cgrp=default handle=617256
+  | schedstat=( 217130470 772389991 1258 )
+  at dalvik.system.NativeStart.run(Native Method)
+
+"HeapWorker" daemon prio=5 tid=2 VMWAIT
+  | group="system" sCount=1 dsCount=0 obj=0x40514328 self=0x20b5a0
+  | sysTid=750 nice=0 sched=0/0 cgrp=default handle=510200
+  | schedstat=( 369700706 680453677 1468 )
+  at dalvik.system.NativeStart.run(Native Method)
+
+----- end 749 -----
+
+
+----- pid 151 at 2012-04-09 10:43:26 -----
+Cmd line: system_server
+
+DALVIK THREADS:
+(mutexes: tll=0 tsl=0 tscl=0 ghl=0 hwl=0 hwll=0)
+"main" prio=5 tid=1 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x40025340 self=0xcf58
+  | sysTid=151 nice=0 sched=0/0 cgrp=default handle=-1345006464
+  | schedstat=( 2511261709 3246150517 16718 )
+  at com.android.server.SystemServer.init1(Native Method)
+  at com.android.server.SystemServer.main(SystemServer.java:777)
+  at java.lang.reflect.Method.invokeNative(Native Method)
+  at java.lang.reflect.Method.invoke(Method.java:538)
+  at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:969)
+  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:727)
+  at dalvik.system.NativeStart.main(Native Method)
+
+"FBThread" prio=5 tid=53 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x40878990 self=0x2031b8
+  | sysTid=1253 nice=0 sched=0/0 cgrp=default handle=2996480
+  | schedstat=( 79547770 352628825 1386 )
+  at dalvik.system.NativeStart.run(Native Method)

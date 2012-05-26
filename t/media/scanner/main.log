@@ -1,0 +1,19 @@
+04-09 09:53:28.670 D/MediaScanner(  441): found .nomedia, skipping directory
+04-09 09:53:28.685 D/MediaScanner(  441):  prescan time: 284ms
+04-09 09:53:28.685 D/MediaScanner(  441):     scan time: 14986ms
+04-09 09:53:28.685 D/MediaScanner(  441): postscan time: 3ms
+04-09 09:53:28.685 D/MediaScanner(  441):    total time: 15273ms
+04-09 09:53:28.687 D/MediaScannerService(  441): done scanning volume external
+04-09 09:53:28.688 D/MediaScannerService(  441): start scanning volume external
+04-09 09:53:28.690 V/ActivityManager(  186): Broadcast: Intent { act=android.intent.action.MEDIA_SCANNER_STARTED dat=file:///mnt/sdcard } ordered=false
+04-09 09:53:28.788 D/StagefrightMediaScanner(  441): processFile '/mnt/sdcard/music/ac3_32_48_ST.wav'.
+
+04-09 09:53:29.040 D/MediaScanner(  441): found .nomedia, skipping directory
+04-09 09:53:29.050 D/MediaScanner(  441): found .nomedia, skipping directory
+04-09 09:53:29.060 D/MediaScanner(  441):  prescan time: 87ms
+04-09 09:53:29.060 D/MediaScanner(  441):     scan time: 280ms
+04-09 09:53:29.060 D/MediaScanner(  441): postscan time: 1ms
+04-09 09:53:29.060 D/MediaScanner(  441):    total time: 368ms
+04-09 09:53:29.061 V/ActivityManager(  186): Broadcast: Intent { act=android.intent.action.MEDIA_SCANNER_FINISHED dat=file:///mnt/sdcard } ordered=false
+04-09 09:53:29.062 D/MediaScannerService(  441): done scanning volume external
+ 

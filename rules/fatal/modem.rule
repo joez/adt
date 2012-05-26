@@ -1,0 +1,14 @@
+{
+	'modem.imei.abnormal' => {
+		file => 'radio',
+		probe => qr/Null IMEI!!$/,
+		hint => 'no IMEI',
+	},
+	
+	'modem.exception.kernel' => {
+		file => 'kernel',
+		probe => qr/MODEM exception occurs$/,
+		context => [0, 10],
+		hint => 'modem exception, search "MD_EX" also',
+	},
+};

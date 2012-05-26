@@ -1,0 +1,56 @@
+#!/usr/bin/env perl
+# author: joe.zheng
+
+use strict;
+use File::Spec;
+use File::Path qw(make_path);
+use File::Basename qw/basename/;
+
+my $directory = shift || '.';
+my $script = (File::Spec->splitpath($0))[2];
+
+if ($directory =~ m/^-/) {
+  print <<"EOF";
+Utility to capture information to report a bug
+Usage:
+    $script [directory]
+Parameters:
+    directory:      the root directory to store the information
+EOF
+  exit;
+}
+
+my ($sec, $min, $hour, $mday, $mon, $year) = localtime;
+my $stamp = sprintf(
+  '%04d%02d%02d-%02d%02d%02d',
+  $year + 1900,
+  $mon + 1, $mday, $hour, $min, $sec
+);
+my $path;
+
+$directory = File::Spec->catdir($directory, 'info-' . $stamp);
+make_path($directory) unless -e $directory;
+
+sub p { local $\ = "\n"; print "$script> ", @_; }
+
+p "dump /data/anr";
+$path = File::Spec->catdir($directory, 'anr');
+system "adb pull /data/anr/ $path";
+
+p "dump /data/tombstones/";
+$path = File::Spec->catdir($directory, 'tombstones');
+system "adb pull /data/tombstones/ $path";
+
+p "dump /data/dropbox/";
+$path = File::Spec->catdir($directory, 'dropbox');
+system "adb pull /data/dropbox/ $path";
+
+p "dump /data/dontpanic/";
+$path = File::Spec->catdir($directory, 'dontpanic');
+system "adb pull /data/dontpanic/ $path";
+
+p "bugreport";
+$path = File::Spec->catfile($directory, 'bugreport.txt');
+system "adb bugreport > $path";
+
+p "done. see $directory for details";

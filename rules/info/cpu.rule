@@ -1,0 +1,7 @@
+{
+	'cpu.events' => {
+		file => 'events',
+		probe => qr/\bcpu\b/,
+		hint => 'cpu: total, user, system, iowait, irq, softirq',
+	},
+};

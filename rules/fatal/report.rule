@@ -1,0 +1,41 @@
+{
+	'report.dropbox' => {
+		file => 'report',
+		probe => qr/^DUMP OF SERVICE dropbox/,
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(0, 2);
+			
+			if ($a->[-1] =~ /Drop box contents:\s*(\d+)\s*entries/) {
+				my $count = $1;
+				my (undef, $all) = $p->context(0, 3 + $count * 2);
+				
+				my $filter = $r->stash('filter_after');
+				unless ($filter) {
+					$filter = Adt::Filter->new->skip(sub {
+						my ($self, $line) = @_;
+						my $skip;
+						my $skip_next = $self->stash('skip_next');
+						
+						if ($skip_next) {
+							$skip_next = 0;
+							$skip++;
+						}
+						elsif ($line =~ /_strictmode/) {
+							$skip_next++;
+							$skip++;
+						}
+						
+						$self->stash('skip_next', $skip_next);
+						return $skip;
+					})->end(qr/-----------------------/)->prepare;
+					$r->stash('filter_after', $filter);
+				}
+				
+				$a = $filter->process($all);
+			}
+			return $b, $a;
+		},
+		hint => 'keywords: SYSTEM_TOMBSTONE, SYSTEM_BOOT, SYSTEM_REBOOT, app_anr, app_crash',
+	},
+};

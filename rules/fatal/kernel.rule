@@ -1,0 +1,24 @@
+{
+	'kernel.panic' => {
+		file => 'kernel',
+		probe => qr/\Q*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***\E/,
+		hint => 'kernel panic',
+	},
+	
+	'kernel.oops' => {
+		file => 'kernel',
+		probe => qr/Internal error: Oops/,
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(4, 100);
+			my $filter = $r->stash('filter_after');
+			unless ($filter) {
+				$filter = Adt::Filter->new->end(qr/Code:/)->prepare;
+				$r->stash('filter_after', $filter);
+			}
+			return $b, $filter->process($a);
+		},
+		hint => 'kernel oops',
+	},
+	
+};

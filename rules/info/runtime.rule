@@ -1,0 +1,59 @@
+{
+	'runtime.start' => {
+		file => 'main|system',
+		probe => 'AndroidRuntime START',
+		hint => 'android runtime start',
+	},
+	'runtime.main' => {
+		file => 'main|system',
+		probe => 'Calling main entry',
+		hint => 'android runtime main',
+	},
+	
+	'boot.progress.events' => {
+		file => 'events',
+		probe => 'boot_progress_',
+		hint => 'boot progress...',
+		format => 'raw',
+	},
+	'boot.system_server.start' => {
+		file => 'main|system',
+		probe => 'Entered the Android system server',
+		hint => 'system_server start',
+	},
+	'boot.systemui.start' => {
+		file => 'main|system',
+		probe => qr/\QStart proc com.android.systemui\E/,
+		hint => 'system ui start',
+	},
+	
+	'shutdown.start' => {
+		file => 'main|system',
+		probe => qr/!!! Request to shutdown !!!/,
+		hint => 'request to shutdown',
+	},
+	
+	'shutdown.progress' => {
+		file => 'main|system',
+		probe => qr/ShutdownThread\(\s*\d+\):/,
+		hint => 'shutdown progress',
+		format => 'raw',
+	},
+	
+	'sysproc.die' => {
+		file => 'main|system',
+		probe => 'Grim Reaper killing system_server',
+		hint => 'system_server die',
+	},
+	'sysproc.start' => {
+		file => 'main|system',
+		probe => 'Entered system_init',
+		hint => 'system_server start',
+	},
+	'sysproc.info' => {
+		file => 'main|system',
+		probe => qr/\bsysproc\b/,
+		hint => '',
+		format => 'raw',
+	},	
+};

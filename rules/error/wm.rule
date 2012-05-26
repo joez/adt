@@ -1,0 +1,7 @@
+{
+	'wm.leak' => {
+		probe => 'WindowLeaked:',
+		context => [1, 12],
+		hint => 'has leaked window',
+	},
+};

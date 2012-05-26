@@ -1,0 +1,14 @@
+{
+	'modem.imei' => {
+		file => 'radio',
+		probe => qr/IMEI:$/,
+		hint => 'the IMEI is',
+	},
+	'modem.version' => {
+		file => 'radio',
+		probe => qr/\+CGMR:/,
+		hint => 'modem version',
+	},
+	
+	
+};

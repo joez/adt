@@ -1,0 +1,21 @@
+{
+	'trace' => {
+		file => 'traces',
+		probe => sub {
+			my ($r, $p) = @_;
+			return 1 if $p->curno == 3;
+		},
+		context => sub {
+			my ($r, $p) = @_;
+			my ($b, $a) = $p->context(0, 80);
+			my $filter = $r->stash('filter_after');
+			unless ($filter) {
+				my $end = qr/\Qat dalvik.system.NativeStart.main\E/;
+				$filter = Adt::Filter->new->end($end)->prepare;
+				$r->stash('filter_after', $filter);
+			}
+			return $b, $filter->process($a);
+		},
+		hint => 'call stack of the java threads',
+	},
+};
