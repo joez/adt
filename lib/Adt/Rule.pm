@@ -76,17 +76,31 @@ sub match_line {
   }
 }
 
-sub fetch_context {
+sub get_context {
   my ($self, $parser) = @_;
   my $p = $self->context;
 
-  return 0 unless $p;
+  return undef unless $p;
 
   if (ref $p eq 'CODE') {
     return $p->($self, $parser);
   }
   else {
     return $parser->context(@{$p});
+  }
+}
+
+sub get_hint {
+  my ($self, $parser) = @_;
+  my $p = $self->hint;
+
+  return undef unless $p;
+
+  if (ref $p eq 'CODE') {
+    return $p->($self, $parser);
+  }
+  else {
+    return $p;
   }
 }
 

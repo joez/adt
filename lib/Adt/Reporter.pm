@@ -37,9 +37,9 @@ sub feed {
   my ($self, $parser, $rule) = @_;
   my ($pool, $seen) = ($self->_output_pool, $self->_output_seen);
 
-  my ($before, $after) = $rule->fetch_context($parser);
+  my ($before, $after) = $rule->get_context($parser);
   my $line = $parser->current_line;
-  my $info = $parser->current_info;
+#  my $info = $parser->current_info;
   my $hash = _hash(@{$before}, $line, @{$after});
 
   unless ($seen->{$hash}) {
@@ -53,6 +53,7 @@ sub feed {
         time         => $parser->file_time,
         lineno       => $parser->curno,
         line         => $line,
+        hint         => $rule->get_hint($parser),
         lines_before => $before,
         lines_after  => $after,
       }

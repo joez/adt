@@ -9,7 +9,7 @@ use overload
   fallback => 1;
 
 has [qw/line lines_before lines_after/];
-has [qw/file lineno rule/];
+has [qw/file lineno rule hint/];
 has 'time' => 0;
 
 my $prefix_top = '# [[ ';
@@ -34,14 +34,14 @@ sub to_string {
   my $mark_cur = @{$before} || @{$after} ? $prefix_cur : '';
 
   if ($rule->format eq 'raw') {
-    push @content, @{$before}, $mark_cur . $self->line, @{$after}, "\n";
+    push @content, @{$before}, $mark_cur . $self->line, @{$after};
   }
   else {
     my $info = sprintf "file: %s, line: %d, rule: %s\n", $self->file,
       $self->lineno, $rule->name;
     push @content, $prefix_top . $info;
 
-    push @content, $prefix_com . $rule->hint, "\n" if $rule->hint;
+    push @content, $prefix_com . $self->hint, "\n" if $self->hint;
 
     push @content, @{$before}, $mark_cur . $self->line, @{$after}, $prefix_end,
       "\n\n";
