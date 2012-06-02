@@ -6,12 +6,16 @@ use File::Spec;
 use File::Path qw(make_path);
 use File::Basename qw/basename/;
 
+use vars qw($VERSION);
+our $VERSION = '1.0';
+
 my $directory = shift || '.';
 my $script = (File::Spec->splitpath($0))[2];
 
 if ($directory =~ m/^-/) {
   print <<"EOF";
 Utility to capture information to report a bug
+Version: $VERSION
 Usage:
     $script [directory]
 Parameters:
@@ -33,24 +37,46 @@ make_path($directory) unless -e $directory;
 
 sub p { local $\ = "\n"; print "$script> ", @_; }
 
-p "dump /data/anr";
-$path = File::Spec->catdir($directory, 'anr');
-system "adb pull /data/anr/ $path";
-
-p "dump /data/tombstones/";
-$path = File::Spec->catdir($directory, 'tombstones');
-system "adb pull /data/tombstones/ $path";
-
-p "dump /data/dropbox/";
-$path = File::Spec->catdir($directory, 'dropbox');
-system "adb pull /data/dropbox/ $path";
-
-p "dump /data/dontpanic/";
-$path = File::Spec->catdir($directory, 'dontpanic');
-system "adb pull /data/dontpanic/ $path";
-
 p "bugreport";
 $path = File::Spec->catfile($directory, 'bugreport.txt');
 system "adb bugreport > $path";
+
+p "dump key data start";
+my @keydata = qw{
+  anr
+  tombstones
+  dropbox
+  dontpanic
+};
+
+for (@keydata) {
+  my $src = '/data/' . $_ . '/';
+  my $dst = File::Spec->catdir($directory, $_);
+  p "dump $src";
+
+  system "adb pull $src $dst";
+}
+p "dump key data done";
+
+
+p "dump databases start";
+my @databases = qw{
+  com.android.providers.contacts
+  com.android.providers.telephony
+  com.android.providers.settings
+  com.android.providers.calendar
+  com.android.providers.downloads
+  com.android.providers.media
+};
+
+for (@databases) {
+  my $src = '/data/data/' . $_ . '/databases/';
+  my $dst = File::Spec->catdir($directory, 'databases', $_);
+  p "dump $src";
+
+  system "adb pull $src $dst";
+}
+p "dump databases done";
+
 
 p "done. see $directory for details";
