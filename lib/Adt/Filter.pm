@@ -38,7 +38,8 @@ sub process {
 
     foreach my $n (qw/begin end want skip/) {
       my $cb = $self->$n;
-      $cbs->{$n} = ref $cb eq 'CODE' ? $cb : sub { $_[1] =~ $cb };
+      $cbs->{$n}
+        = ref $cb eq 'CODE' ? $cb : sub { defined $_[1] && $_[1] =~ $cb };
     }
 
     $self->stash('cbs', $cbs);
