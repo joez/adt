@@ -1,0 +1,171 @@
+#!/usr/bin/env perl
+# author: joe.zheng
+
+use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::RealBin/../lib";
+
+use Spreadsheet::ParseExcel;
+use XML::Simple;
+
+use Encode qw/decode from_to/;
+use Encode::Guess;
+
+use Getopt::Long;
+use File::Path qw(make_path);
+use File::Basename;
+use File::Spec::Functions qw/catdir catfile splitpath splitdir/;
+
+my %cmdcbs = (import => \&do_import, export => \&do_export,);
+
+my $script = basename($0);
+
+sub usage {
+  print <<"EOF";
+Usage: $script Command Parameters
+Command:
+    export    export strings to spread sheet
+    import    import strings from spread sheet
+Parameters:
+    src    
+    dst
+EOF
+
+  exit;
+}
+
+my $help;
+GetOptions("help|h" => \$help,) or usage();
+
+my $cmd = shift;
+usage() if $help || !$cmd;
+
+$cmd = lc $cmd;
+my $cb = $cmdcbs{$cmd};
+if ($cb) {
+  $cb->(@ARGV);
+}
+else {
+  warn 'no such command';
+  usage();
+}
+
+sub do_import {
+  my $src = shift || 'strings.xls';
+  my $dst = shift || 'strings';
+
+  die "no import file: $src" unless -e $src;
+
+  make_path($dst) unless -e $dst;
+
+  my $parser   = Spreadsheet::ParseExcel->new();
+  my $workbook = $parser->parse($src);
+  my $xs       = XML::Simple->new(
+    ForceArray => 1,
+    KeyAttr    => [],
+    NoEscape   => 1,
+    XMLDecl    => '<?xml version="1.0" encoding="utf-8"?>',
+    ContentKey => 'text',
+    RootName   => 'resources'
+  );
+
+  if (!defined $workbook) {
+    die $parser->error(), ".\n";
+  }
+
+  my @head;
+  # TODO: it is hardcoded right now, should be got from the head line
+  my %cols = (
+    path  => 1,
+    type  => 2,
+    name  => 4,
+    index => 6,
+    note  => 8,
+    base  => 10,
+    text  => 13,
+  );
+
+  my $GV = sub {
+    my $cell = $_[0]->get_cell($_[1], $_[2]);
+
+    return '' unless $cell;
+
+    my $text = $cell->unformatted();
+    my $code = $cell->{Code} || '';
+
+    # caution!
+    if ($text && $code eq 'ucs2') {
+      $text = decode("UTF-16BE", $text);
+    }
+
+    return $text;
+  };
+
+  for my $worksheet ($workbook->worksheets()) {
+    print "parsing worksheet: @{ [$worksheet->get_name()] }\n";
+
+    my %db;
+    my ($row_min, $row_max) = $worksheet->row_range();
+    my ($col_min, $col_max) = $worksheet->col_range();
+
+    if ($col_max < $cols{text}) {
+      warn "no translate at column: $col_max, skip";
+      next;
+    }
+
+    for my $row ($row_min .. $row_max) {
+      print "parsing row: $row\n" unless $row % 100;
+
+      # skip first row
+      next if $row == 0;
+
+      # head
+      if ($row == 1) {
+        @head = map { $GV->($worksheet, $row, $_) } $col_min .. $col_max;
+        next;
+      }
+
+      my $path = $GV->($worksheet, $row, $cols{path});
+      unless ($path) {
+        warn "no path defined at row: $row, skip\n";
+        next;
+      }
+
+      # for windows only
+      $path =~ s|\\|/|g;
+
+      my ($type, $name, $index, $text)
+        = map { $GV->($worksheet, $row, $cols{$_}) } qw/type name index text/;
+      my $seen = $db{$path}{seen}{$type}{$name};
+      my $item = $seen || {};
+      if ($type eq 'string') {
+        @{$item}{qw/name text/} = ($name, $text);
+      }
+      elsif ($type eq 'string-array') {
+        push @{$item->{item}}, $text;
+        $item->{name} = $name unless $seen;
+      }
+      elsif ($type eq 'plurals') {
+        push @{$item->{item}}, {quantity => $index, text => $text};
+        $item->{name} = $name unless $seen;
+      }
+      push @{$db{$path}{data}{$type}}, $item unless $seen;
+      $db{$path}{seen}{$type}{$name} = $item;
+    }
+
+    for my $path (sort keys %db) {
+      my (undef, $p, $f) = splitpath($path);
+      my @dirs = splitdir($p);
+      $dirs[-2] .= '-' . $head[$cols{text}];
+      my $d = catdir($dst, @dirs);
+      make_path($d) unless -e $d;
+
+      my $dest = catfile($d, $f);
+      open my $fh, '>:encoding(UTF-8)', $dest or die;
+      $xs->XMLout($db{$path}{data}, OutputFile => $fh);
+      print "output: $dest\n";
+    }
+  }
+}
