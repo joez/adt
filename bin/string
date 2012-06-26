@@ -71,11 +71,17 @@ sub do_import {
     RootName   => 'resources'
   );
 
+  my %root_attr = (
+    'xmlns:android' => "http://schemas.android.com/apk/res/android",
+    'xmlns:xliff'   => "urn:oasis:names:tc:xliff:document:1.2",
+  );
+
   if (!defined $workbook) {
     die $parser->error(), ".\n";
   }
 
   my @head;
+
   # TODO: it is hardcoded right now, should be got from the head line
   my %cols = (
     path  => 1,
@@ -164,6 +170,7 @@ sub do_import {
 
       my $dest = catfile($d, $f);
       open my $fh, '>:encoding(UTF-8)', $dest or die;
+      @{$db{$path}{data}}{keys %root_attr} = values %root_attr;
       $xs->XMLout($db{$path}{data}, OutputFile => $fh);
       print "output: $dest\n";
     }
